@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#120000">
+<title>IT SLOT MACHINE</title>
+
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; touch-action: manipulation; overscroll-behavior: none; }
+    body {
+        font-family: 'Trebuchet MS', Arial, sans-serif;
+        background: radial-gradient(circle at 50% 0%, #3a0505 0%, #120000 50%, #000 100%);
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        user-select: none; -webkit-user-select: none;
+    }
+    body::after {
+        content: ""; position: fixed; inset: 0; pointer-events: none;
+        background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,.85) 100%);
+        z-index: 5;
+    }
+
+    .bg-lights { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+    .bg-lights span { position: absolute; width: 3px; height: 3px; border-radius: 50%; animation: floatUp linear infinite; }
+    @keyframes floatUp {
+        0% { transform: translateY(100vh) scale(.4); opacity: 0; }
+        10%,90% { opacity: 1; }
+        100% { transform: translateY(-10vh) scale(1.3); opacity: 0; }
+    }
+
+    .machine {
+        position: relative; z-index: 2;
+        width: min(96vw, 520px); max-height: 96vh;
+        padding: clamp(10px, 3vw, 22px);
+        background: linear-gradient(180deg, #4a0e0e 0%, #240404 45%, #0e0101 100%);
+        border: clamp(3px, 1vw, 5px) solid #d4af37;
+        border-radius: clamp(14px, 4vw, 24px);
+        box-shadow:
+            0 0 0 3px #5a3a0a, 0 0 0 6px #d4af37,
+            0 0 50px rgba(255,200,0,.4), inset 0 0 60px #000,
+            inset 0 0 120px rgba(150,0,0,.5);
+        display: flex; flex-direction: column;
+        gap: clamp(6px, 1.5vh, 12px);
+        animation: machineGlow 3s ease-in-out infinite alternate;
+    }
+    @keyframes machineGlow {
+        from { box-shadow: 0 0 0 3px #5a3a0a, 0 0 0 6px #d4af37, 0 0 40px rgba(255,200,0,.3), inset 0 0 60px #000, inset 0 0 120px rgba(150,0,0,.5); }
+        to { box-shadow: 0 0 0 3px #5a3a0a, 0 0 0 6px #ffd700, 0 0 90px rgba(255,200,0,.6), inset 0 0 60px #000, inset 0 0 120px rgba(200,0,0,.7); }
+    }
+
+    .bulbs { position: absolute; inset: 8px; border-radius: 14px; pointer-events: none; z-index: 3; }
+    .bulbs i {
+        position: absolute;
+        width: clamp(7px, 2vw, 11px); height: clamp(7px, 2vw, 11px);
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #fff8c0, #ffcc00 40%, #b8860b 80%);
+        box-shadow: 0 0 8px #ffcc00, 0 0 16px #ff8800;
+        animation: bulbBlink 1.2s infinite alternate;
+    }
+    .bulbs i:nth-child(odd) { animation-delay: .3s; }
+    .bulbs i:nth-child(3n) { animation-delay: .6s; }
+    @keyframes bulbBlink { 0% { opacity:.35; transform:scale(.8); } 100% { opacity:1; transform:scale(1.1); } }
+
+    h1 {
+        font-family: 'Impact', 'Arial Black', sans-serif;
+        font-size: clamp(18px, 6vw, 34px);
+        letter-spacing: clamp(2px, 1.2vw, 6px);
+        text-align: center;
+        background: linear-gradient(180deg, #fff8c0 0%, #ffcc00 35%, #ff8800 62%, #b83a00 100%);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 12px rgba(255,180,0,.8));
+        animation: titlePulse 2s ease-in-out infinite alternate;
+    }
+    @keyframes titlePulse {
+        from { filter: drop-shadow(0 0 6px rgba(255,180,0,.5)); }
+        to { filter: drop-shadow(0 0 20px rgba(255,220,100,1)); }
+    }
+
+    .subtitle {
+        text-align: center; color: #e8b84b;
+        font-size: clamp(9px, 2.4vw, 12px);
+        letter-spacing: clamp(1px, .5vw, 3px);
+        text-transform: uppercase;
+        text-shadow: 0 0 8px rgba(255,180,0,.6);
+        font-style: italic;
+    }
+
+    .meters { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(4px, 1.5vw, 8px); }
+    .meter {
+        background: linear-gradient(180deg, #1a0000, #050000);
+        border: 2px solid #b8860b; border-radius: 8px;
+        padding: clamp(4px, 1.5vw, 8px) clamp(4px, 1.5vw, 10px);
+        text-align: center;
+        box-shadow: inset 0 0 14px #000;
+    }
+    .meter .label { font-size: clamp(7px, 2vw, 10px); letter-spacing: clamp(.5px, .4vw, 2px); color: #b8860b; text-transform: uppercase; }
+    .meter .value { font-family: 'Impact', sans-serif; font-size: clamp(14px, 4.5vw, 22px); color: #ffe066; text-shadow: 0 0 10px #ff8c00; letter-spacing: 1px; }
+
+    .play-area { display: grid; grid-template-columns: 1fr auto; gap: clamp(6px, 2vw, 12px); align-items: stretch; }
+
+    .display {
+        position: relative;
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: clamp(4px, 1.5vw, 8px);
+        padding: clamp(8px, 2.5vw, 16px);
+        background: linear-gradient(180deg, #1a0000 0%, #050000 100%);
+        border: 3px solid #8b6914; border-radius: clamp(10px, 3vw, 16px);
+        box-shadow:
+            0 0 0 2px #3a2500, inset 0 0 30px #000,
+            inset 0 0 70px rgba(100,0,0,.75), 0 0 25px rgba(255,180,0,.3);
+        overflow: hidden;
+    }
+    .display::before {
+        content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, transparent, #ffd700, #fff8c0, #ffd700, transparent);
+        box-shadow: 0 0 14px #ffcc00; z-index: 4;
+    }
+
+    .payline {
+        position: absolute; top: 50%; left: 4%; right: 4%; height: 3px;
+        transform: translateY(-50%);
+        background: linear-gradient(90deg, transparent, #ff2a00 15%, #ffcc00 50%, #ff2a00 85%, transparent);
+        box-shadow: 0 0 14px #ff4400, 0 0 30px #ff8800;
+        opacity: .25; transition: opacity .3s; z-index: 5; pointer-events: none;
+    }
+    .payline.active { opacity: 1; animation: paylinePulse .5s ease-in-out infinite alternate; }
+    @keyframes paylinePulse {
+        from { box-shadow: 0 0 14px #ff4400, 0 0 30px #ff8800; }
+        to { box-shadow: 0 0 24px #ffe066, 0 0 55px #ff4400; }
+    }
+
+    .reel {
+        aspect-ratio: 1 / 1.05;
+        background: linear-gradient(180deg, #1a1a1a 0%, #f5f5f5 15%, #ffffff 50%, #f5f5f5 85%, #1a1a1a 100%);
+        border: clamp(2px, 1vw, 4px) solid #b8860b;
+        border-radius: clamp(6px, 2vw, 12px);
+        display: flex; justify-content: center; align-items: center;
+        box-shadow:
+            inset 0 0 25px rgba(0,0,0,.5),
+            inset 0 8px 18px rgba(0,0,0,.35),
+            inset 0 -8px 18px rgba(0,0,0,.35),
+            0 0 14px rgba(255,200,0,.4);
+        position: relative; overflow: hidden;
+        transition: box-shadow .3s;
+    }
+    .reel::before {
+        content: ""; position: absolute; top: 0; left: 0; right: 0; height: 45%;
+        background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0));
+        border-radius: 6px 6px 0 0; pointer-events: none; z-index: 2;
+    }
+    .reel::after {
+        content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 30%;
+        background: linear-gradient(0deg, rgba(0,0,0,.4), transparent);
+        pointer-events: none; z-index: 2;
+    }
+    .reel svg {
+        width: 80%; height: 80%;
+        display: block;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,.4));
+        position: relative; z-index: 1;
+    }
+    .reel.spinning {
+        animation: shake .1s infinite;
+        box-shadow:
+            inset 0 0 25px rgba(0,0,0,.5),
+            0 0 24px rgba(255,220,0,.95),
+            0 0 50px rgba(255,140,0,.7);
+    }
+    @keyframes shake {
+        0% { transform: translateY(-3px) rotate(-.6deg); }
+        50% { transform: translateY(3px) rotate(.6deg); }
+        100% { transform: translateY(-3px) rotate(-.6deg); }
+    }
+    .reel.win {
+        box-shadow:
+            inset 0 0 25px rgba(0,0,0,.5),
+            0 0 30px rgba(255,215,0,1),
+            0 0 65px rgba(255,140,0,.9);
+        animation: winPulse .55s ease-in-out infinite alternate;
+    }
+    @keyframes winPulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+    /* ===== РЫЧАГ (ИСПРАВЛЕН) ===== */
+    .lever-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        width: clamp(52px, 13vw, 74px);
+        padding-bottom: 4px;
+    }
+    .lever {
+        position: relative;
+        width: 100%;
+        height: clamp(110px, 28vw, 160px);
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+    .lever-base {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: clamp(40px, 10vw, 56px);
+        height: clamp(12px, 3vw, 18px);
+        background: linear-gradient(180deg, #8b6914, #3a2500);
+        border: 2px solid #d4af37;
+        border-radius: 6px 6px 3px 3px;
+        box-shadow: 0 0 12px rgba(255,200,0,.45);
+        z-index: 2;
+    }
+    .lever-stick {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        width: 10px;
+        height: clamp(70px, 19vw, 105px);
+        background: linear-gradient(to right, #3a3a3a, #e8e8e8 45%, #9a9a9a 55%, #2a2a2a);
+        border-radius: 5px;
+        transform-origin: bottom center;
+        transform: translateX(-50%) rotate(-25deg);
+        transition: transform .18s cubic-bezier(.34,1.56,.64,1);
+        z-index: 1;
+    }
+    .lever-ball {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: clamp(46px, 12vw, 64px);
+        height: clamp(46px, 12vw, 64px);
+        border-radius: 50%;
+        background: radial-gradient(circle at 32% 28%, #fff 0%, #ffdd66 12%, #ff8800 35%, #cc2200 65%, #7a0000 100%);
+        box-shadow: 0 0 20px #ff4400, 0 0 40px rgba(255,80,0,.75);
+        transform: translateX(-50%);
+        transition: top .18s cubic-bezier(.34,1.56,.64,1);
+        z-index: 3;
+        animation: ballGlow 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes ballGlow {
+        from { box-shadow: 0 0 20px #ff4400, 0 0 40px rgba(255,80,0,.75); }
+        to { box-shadow: 0 0 32px #ff6600, 0 0 65px rgba(255,120,0,1); }
+    }
+    .lever.pulled .lever-stick {
+        transform: translateX(-50%) rotate(25deg);
+    }
+    .lever.pulled .lever-ball {
+        top: clamp(58px, 16vw, 88px);
+    }
+
+    .result {
+        text-align: center;
+        font-family: 'Impact', 'Arial Black', sans-serif;
+        font-size: clamp(15px, 5vw, 26px);
+        letter-spacing: clamp(1px, .5vw, 3px);
+        color: #ffe066;
+        min-height: clamp(28px, 7vw, 44px);
+        display: flex; align-items: center; justify-content: center;
+        text-shadow: 0 0 10px #ff8c00, 0 0 22px #ff4400, 0 2px 0 #5a2a00;
+        line-height: 1.15; padding: 0 4px;
+    }
+    .result.win-text { animation: resultFlash .4s ease-in-out infinite alternate; }
+    @keyframes resultFlash {
+        from { color: #ffe066; text-shadow: 0 0 10px #ff8c00, 0 0 22px #ff4400; }
+        to { color: #fff8c0; text-shadow: 0 0 20px #ffd700, 0 0 45px #ff8800; }
+    }
+
+    .controls { display: grid; grid-template-columns: auto 1fr auto; gap: clamp(6px, 2vw, 10px); align-items: center; }
+    .bet-btn {
+        width: clamp(48px, 13vw, 62px); height: clamp(48px, 13vw, 62px);
+        border-radius: 50%; border: 3px solid #d4af37;
+        background: linear-gradient(180deg, #555, #1a1a1a);
+        color: #ffcc00; font-size: clamp(20px, 6vw, 28px); font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 0 #000, 0 0 14px rgba(255,200,0,.4);
+        transition: transform .08s; font-family: 'Arial Black', sans-serif;
+        line-height: 1; touch-action: manipulation;
+    }
+    .bet-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #000; }
+    .bet-btn:disabled { opacity: .35; }
+
+    .start {
+        padding: clamp(14px, 4vw, 22px) clamp(16px, 5vw, 40px);
+        font-family: 'Impact', 'Arial Black', sans-serif;
+        font-size: clamp(18px, 5.5vw, 28px);
+        letter-spacing: clamp(1px, .5vw, 4px);
+        color: #fff8c0;
+        background: linear-gradient(180deg, #ff5555 0%, #cc0000 45%, #7a0000 100%);
+        border: 3px solid #ffd700; border-radius: clamp(10px, 3vw, 14px);
+        cursor: pointer;
+        box-shadow:
+            0 0 0 3px #5a0000, 0 6px 0 #4a0000,
+            0 8px 18px rgba(0,0,0,.8), 0 0 26px rgba(255,60,0,.6),
+            inset 0 2px 5px rgba(255,255,255,.4);
+        text-shadow: 0 2px 4px rgba(0,0,0,.9), 0 0 10px rgba(255,200,0,.9);
+        position: relative; overflow: hidden;
+        transition: transform .08s;
+        touch-action: manipulation;
+    }
+    .start::after {
+        content: ""; position: absolute; top: -60%; left: -60%;
+        width: 40%; height: 220%;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+        transform: rotate(20deg); animation: sheen 3s ease-in-out infinite;
+    }
+    @keyframes sheen { 0% { left: -60%; } 50% { left: 130%; } 100% { left: 130%; } }
+    .start:active:not(:disabled) {
+        transform: translateY(6px);
+        box-shadow: 0 0 0 3px #5a0000, 0 0 0 #4a0000, 0 0 24px rgba(255,120,0,.9);
+    }
+    .start:disabled { filter: grayscale(.6) brightness(.7); }
+
+    .hint {
+        text-align: center; color: #b8860b;
+        font-size: clamp(8px, 2.2vw, 11px);
+        letter-spacing: clamp(1px, .5vw, 3px);
+        text-transform: uppercase;
+        animation: hintBlink 2s ease-in-out infinite alternate;
+    }
+    @keyframes hintBlink { from { opacity:.5; } to { opacity:1; } }
+
+    .jackpot {
+        position: fixed; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        pointer-events: none; z-index: 100;
+        opacity: 0; transition: opacity .3s;
+    }
+    .jackpot.show { opacity: 1; }
+    .jackpot-text {
+        font-family: 'Impact', 'Arial Black', sans-serif;
+        font-size: clamp(40px, 16vw, 110px);
+        letter-spacing: clamp(2px, 2vw, 10px);
+        color: #fff8c0;
+        text-shadow: 0 0 24px #ffd700, 0 0 55px #ff8800, 0 0 100px #ff2200, 0 4px 0 #5a0000;
+        animation: jackpotZoom .5s ease-out infinite alternate;
+        text-align: center;
+    }
+    @keyframes jackpotZoom {
+        from { transform: scale(1) rotate(-2deg); }
+        to { transform: scale(1.15) rotate(2deg); }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+        .machine { width: min(96vw, 780px); max-height: 98vh; padding: 6px 10px; gap: 4px; }
+        h1 { font-size: clamp(14px, 4vw, 22px); }
+        .subtitle { display: none; }
+        .meter { padding: 2px 6px; }
+        .meter .label { font-size: 7px; }
+        .meter .value { font-size: 12px; }
+        .result { font-size: 13px; min-height: 20px; }
+        .bet-btn { width: 42px; height: 42px; font-size: 18px; }
+        .start { padding: 10px 22px; font-size: 16px; }
+        .hint { display: none; }
+        .lever-col { width: 48px; }
+        .lever { height: 92px; }
+        .lever-stick { height: 55px; }
+        .lever-ball { width: 42px; height: 42px; }
+        .lever.pulled .lever-ball { top: 45px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="bg-lights" id="bgLights"></div>
+<div class="jackpot" id="jackpot"><div class="jackpot-text">JACKPOT!</div></div>
+
+<div class="machine">
+    <div class="bulbs" id="bulbs"></div>
+    <h1>IT SLOT MACHINE</h1>
+    <div class="subtitle">★ Кому достанется задача? ★</div>
+
+    <div class="meters">
+        <div class="meter"><div class="label">Баланс</div><div class="value" id="balance">1000</div></div>
+        <div class="meter"><div class="label">Ставка</div><div class="value" id="betValue">50</div></div>
+        <div class="meter"><div class="label">Выигрыш</div><div class="value" id="winValue">0</div></div>
+    </div>
+
+    <div class="play-area">
+        <div class="display">
+            <div class="payline" id="payline"></div>
+            <div class="reel" id="reel1"></div>
+            <div class="reel" id="reel2"></div>
+            <div class="reel" id="reel3"></div>
+        </div>
+        <div class="lever-col">
+            <div class="lever" id="lever">
+                <div class="lever-base"></div>
+                <div class="lever-stick"></div>
+                <div class="lever-ball"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="result" id="result">ДЁРНИТЕ РЫЧАГ</div>
+
+    <div class="controls">
+        <button class="bet-btn" id="betMinus" onclick="changeBet(-50)">−</button>
+        <button class="start" id="startBtn" onclick="spin()">🎰 КРУТИТЬ</button>
+        <button class="bet-btn" id="betPlus" onclick="changeBet(50)">+</button>
+    </div>
+
+    <div class="hint">⚡ Тапни рычаг или кнопку ⚡</div>
+</div>
+
+<script>
+/* ===== SVG-СИМВОЛЫ ===== */
+function svgCherry() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 30 Q55 15 70 12" stroke="#3a7a1a" stroke-width="3" fill="none"/>
+        <path d="M50 30 Q45 15 30 12" stroke="#3a7a1a" stroke-width="3" fill="none"/>
+        <ellipse cx="30" cy="11" rx="10" ry="4" fill="#4faa25" transform="rotate(-20 30 11)"/>
+        <ellipse cx="70" cy="11" rx="10" ry="4" fill="#4faa25" transform="rotate(20 70 11)"/>
+        <defs><radialGradient id="cg" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="#ff5555"/>
+            <stop offset="100%" stop-color="#8a0000"/>
+        </radialGradient></defs>
+        <circle cx="35" cy="65" r="20" fill="url(#cg)"/>
+        <circle cx="28" cy="58" r="5" fill="#ff8a8a" opacity="0.8"/>
+        <circle cx="65" cy="68" r="18" fill="url(#cg)"/>
+        <circle cx="58" cy="61" r="4.5" fill="#ff8a8a" opacity="0.8"/>
+    </svg>`;
+}
+function svgLemon() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="lg" cx="35%" cy="30%">
+            <stop offset="0%" stop-color="#fff27a"/>
+            <stop offset="100%" stop-color="#c8a000"/>
+        </radialGradient></defs>
+        <ellipse cx="50" cy="55" rx="32" ry="24" fill="url(#lg)"/>
+        <path d="M50 31 Q55 22 62 24 Q58 30 54 33 Z" fill="#f6d800"/>
+        <path d="M50 79 Q45 88 38 86 Q42 80 46 77 Z" fill="#f6d800"/>
+        <ellipse cx="40" cy="46" rx="8" ry="5" fill="#fff8b0" opacity="0.7"/>
+    </svg>`;
+}
+function svgBell() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fff27a"/>
+            <stop offset="50%" stop-color="#ffcc00"/>
+            <stop offset="100%" stop-color="#a07800"/>
+        </linearGradient></defs>
+        <path d="M50 15 Q30 15 25 55 L20 75 L80 75 L75 55 Q70 15 50 15 Z" fill="url(#bg1)"/>
+        <ellipse cx="50" cy="80" rx="32" ry="8" fill="#d4a000"/>
+        <rect x="45" y="80" width="10" height="10" fill="#8a6a00" rx="2"/>
+        <circle cx="50" cy="88" r="7" fill="#ffd700"/>
+        <circle cx="50" cy="88" r="4" fill="#8a6a00"/>
+        <ellipse cx="40" cy="40" rx="8" ry="12" fill="#fff8c0" opacity="0.55"/>
+    </svg>`;
+}
+function svgStar() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="sg" cx="40%" cy="35%">
+            <stop offset="0%" stop-color="#fff8c0"/>
+            <stop offset="60%" stop-color="#ffcc00"/>
+            <stop offset="100%" stop-color="#b87800"/>
+        </radialGradient></defs>
+        <path d="M50 8 L62 38 L94 38 L68 58 L78 90 L50 70 L22 90 L32 58 L6 38 L38 38 Z"
+              fill="url(#sg)" stroke="#a07800" stroke-width="1.5"/>
+        <path d="M50 22 L57 40 L76 40 L60 52 L66 72 L50 60 L34 72 L40 52 L24 40 L43 40 Z"
+              fill="#fff8c0" opacity="0.35"/>
+    </svg>`;
+}
+function svgClover() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="clg" cx="35%" cy="30%">
+            <stop offset="0%" stop-color="#7fe87f"/>
+            <stop offset="100%" stop-color="#1a5a1a"/>
+        </radialGradient></defs>
+        <circle cx="50" cy="35" r="15" fill="url(#clg)"/>
+        <circle cx="35" cy="50" r="15" fill="url(#clg)"/>
+        <circle cx="65" cy="50" r="15" fill="url(#clg)"/>
+        <path d="M50 65 Q48 80 42 92" stroke="#1e6a1e" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <ellipse cx="42" cy="75" rx="8" ry="4" fill="#4faa25" transform="rotate(-30 42 75)"/>
+    </svg>`;
+}
+function svgDiamond() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="dg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#a0e8ff"/>
+            <stop offset="50%" stop-color="#22a0e0"/>
+            <stop offset="100%" stop-color="#004a8a"/>
+        </linearGradient></defs>
+        <path d="M50 10 L85 40 L50 90 L15 40 Z" fill="url(#dg)"/>
+        <path d="M50 10 L70 40 L50 90 L30 40 Z" fill="#b8e8ff" opacity="0.4"/>
+        <path d="M15 40 L85 40" stroke="#fff" stroke-width="1" opacity="0.6"/>
+    </svg>`;
+}
+function svgMoney() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e8d070"/>
+            <stop offset="50%" stop-color="#c8a040"/>
+            <stop offset="100%" stop-color="#7a5a10"/>
+        </linearGradient></defs>
+        <ellipse cx="50" cy="60" rx="30" ry="32" fill="url(#mg)"/>
+        <path d="M42 30 Q50 22 58 30 L58 40 Q50 36 42 40 Z" fill="#8a6a10"/>
+        <text x="50" y="74" font-size="36" font-weight="bold" text-anchor="middle" fill="#5a3a00" font-family="Arial Black, sans-serif">$</text>
+    </svg>`;
+}
+function svgSlot() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="slotg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff6666"/>
+            <stop offset="100%" stop-color="#8a0000"/>
+        </linearGradient></defs>
+        <rect x="15" y="30" width="70" height="55" rx="8" fill="url(#slotg)" stroke="#ffd700" stroke-width="2"/>
+        <rect x="22" y="38" width="56" height="26" rx="4" fill="#fff8c0"/>
+        <text x="34" y="58" font-size="20" text-anchor="middle" font-family="Arial Black">7</text>
+        <text x="50" y="58" font-size="20" text-anchor="middle" font-family="Arial Black">7</text>
+        <text x="66" y="58" font-size="20" text-anchor="middle" font-family="Arial Black">7</text>
+        <rect x="42" y="70" width="16" height="10" rx="2" fill="#ffd700"/>
+    </svg>`;
+}
+function svgCrown() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="crg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fff27a"/>
+            <stop offset="50%" stop-color="#ffcc00"/>
+            <stop offset="100%" stop-color="#a07800"/>
+        </linearGradient></defs>
+        <path d="M15 75 L20 35 L35 50 L50 25 L65 50 L80 35 L85 75 Z" fill="url(#crg)" stroke="#8a6a00" stroke-width="2"/>
+        <rect x="15" y="75" width="70" height="12" fill="#d4a000" stroke="#8a6a00" stroke-width="1.5" rx="2"/>
+        <circle cx="20" cy="32" r="4" fill="#ff3300"/>
+        <circle cx="50" cy="22" r="4" fill="#00aaff"/>
+        <circle cx="80" cy="32" r="4" fill="#00aa33"/>
+        <circle cx="35" cy="52" r="3" fill="#ff0088"/>
+        <circle cx="65" cy="52" r="3" fill="#ff0088"/>
+    </svg>`;
+}
+function svgSeven() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="svg7g" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffaaaa"/>
+            <stop offset="40%" stop-color="#ff2222"/>
+            <stop offset="100%" stop-color="#7a0000"/>
+        </linearGradient></defs>
+        <text x="50" y="82" font-size="90" font-weight="bold" text-anchor="middle"
+              font-family="Arial Black, sans-serif" fill="url(#svg7g)"
+              stroke="#5a0000" stroke-width="2">7</text>
+    </svg>`;
+}
+function svgRocket() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10 Q65 30 65 60 L35 60 Q35 30 50 10 Z" fill="#e8e8e8" stroke="#888" stroke-width="1.5"/>
+        <path d="M35 60 L30 78 L42 68 Z" fill="#cc2200"/>
+        <path d="M65 60 L70 78 L58 68 Z" fill="#cc2200"/>
+        <circle cx="50" cy="38" r="8" fill="#22a0e0" stroke="#004a8a" stroke-width="1.5"/>
+        <path d="M45 78 Q50 92 55 78 Z" fill="#ff8800"/>
+        <path d="M47 78 Q50 88 53 78 Z" fill="#ffcc00"/>
+    </svg>`;
+}
+function svgTrophy() {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fff27a"/>
+            <stop offset="50%" stop-color="#ffcc00"/>
+            <stop offset="100%" stop-color="#a07800"/>
+        </linearGradient></defs>
+        <path d="M30 20 L70 20 L68 45 Q65 65 50 68 Q35 65 32 45 Z" fill="url(#tg)" stroke="#8a6a00" stroke-width="1.5"/>
+        <path d="M30 25 Q18 25 18 40 Q18 52 32 52" stroke="#a07800" stroke-width="3" fill="none"/>
+        <path d="M70 25 Q82 25 82 40 Q82 52 68 52" stroke="#a07800" stroke-width="3" fill="none"/>
+        <rect x="45" y="68" width="10" height="14" fill="#a07800"/>
+        <rect x="32" y="82" width="36" height="8" rx="2" fill="#8a6a00"/>
+        <rect x="28" y="88" width="44" height="6" rx="2" fill="#a07800"/>
+        <text x="50" y="52" font-size="20" text-anchor="middle" font-weight="bold" fill="#7a5a00" font-family="Arial Black">1</text>
+    </svg>`;
+}
+
+/* ===== Символы + призы ===== */
+const symbols = [
+    { svg: svgCherry,  name: "СЕТЬ",        prize: 2  },
+    { svg: svgLemon,   name: "ИБ",          prize: 2  },
+    { svg: svgBell,    name: "ИНФРА",       prize: 3  },
+    { svg: svgStar,    name: "1С",          prize: 3  },
+    { svg: svgClover,  name: "ПОДДЕРЖКА",   prize: 4  },
+    { svg: svgDiamond, name: "СИСТЕМЫ",     prize: 5  },
+    { svg: svgMoney,   name: "ТЕЛЕФОНИЯ",   prize: 5  },
+    { svg: svgSlot,    name: "РАЗРАБОТКА",  prize: 6  },
+    { svg: svgCrown,   name: "БАЗЫ ДАННЫХ", prize: 8  },
+    { svg: svgSeven,   name: "HELPDESK",    prize: 10 },
+    { svg: svgRocket,  name: "DEVOPS",      prize: 12 },
+    { svg: svgTrophy,  name: "ПРИКЛАДНЫЕ",  prize: 15 }
+];
+
+let spinning = false;
+let balance = 1000;
+let bet = 50;
+
+/* Лампочки */
+(function generateBulbs() {
+    const bulbs = document.getElementById("bulbs");
+    const count = 20;
+    for (let i = 0; i < count; i++) {
+        const bulb = document.createElement("i");
+        const t = i / count;
+        let x, y;
+        if (t < 0.3)       { x = (t / 0.3) * 100; y = 0; }
+        else if (t < 0.55) { x = 100; y = ((t - 0.3) / 0.25) * 100; }
+        else if (t < 0.8)  { x = 100 - ((t - 0.55) / 0.25) * 100; y = 100; }
+        else               { x = 0; y = 100 - ((t - 0.8) / 0.2) * 100; }
+        bulb.style.left = `calc(${x}% - 6px)`;
+        bulb.style.top = `calc(${y}% - 6px)`;
+        bulbs.appendChild(bulb);
+    }
+})();
+
+/* Фоновые огоньки */
+(function generateBgLights() {
+    const c = document.getElementById("bgLights");
+    for (let i = 0; i < 20; i++) {
+        const s = document.createElement("span");
+        s.style.left = Math.random() * 100 + "%";
+        s.style.animationDuration = (6 + Math.random() * 8) + "s";
+        s.style.animationDelay = (Math.random() * 8) + "s";
+        const col = Math.random() > 0.5 ? "#ffcc00" : "#ff5500";
+        s.style.background = col;
+        s.style.boxShadow = `0 0 12px ${col}, 0 0 24px ${col}`;
+        c.appendChild(s);
+    }
+})();
+
+/* Звук */
+let audioCtx = null;
+function initAudio() {
+    if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    }
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+}
+function beep(freq, dur, type, vol) {
+    if (!audioCtx) return;
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type || "square";
+        osc.frequency.value = freq;
+        gain.gain.value = vol || 0.05;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+        osc.stop(audioCtx.currentTime + dur);
+    } catch(e) {}
+}
+const playClick = () => beep(880, 0.03, "square", 0.025);
+const playStop = () => beep(440, 0.1, "sawtooth", 0.05);
+const playWin = () => [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,0.15,"triangle",0.07),i*110));
+const playJackpot = () => [523,659,784,1047,1319,1568].forEach((f,i)=>setTimeout(()=>beep(f,0.22,"triangle",0.09),i*90));
+
+document.addEventListener("touchstart", initAudio, { once: true, passive: true });
+document.addEventListener("click", initAudio, { once: true });
+
+/* Интерфейс */
+function updateUI() {
+    document.getElementById("balance").textContent = balance;
+    document.getElementById("betValue").textContent = bet;
+    document.getElementById("betMinus").disabled = bet <= 50 || spinning;
+    document.getElementById("betPlus").disabled = bet >= balance || spinning;
+}
+function changeBet(delta) {
+    if (spinning) return;
+    initAudio();
+    bet = Math.max(50, Math.min(balance, bet + delta));
+    updateUI();
+    playClick();
+}
+
+/* Игра */
+const randomSymbol = () => symbols[Math.floor(Math.random() * symbols.length)];
+function setSymbol(reelEl, sym) {
+    reelEl.innerHTML = sym.svg();
+    reelEl.dataset.name = sym.name;
+    reelEl.dataset.prize = sym.prize;
+}
+
+function spin() {
+    if (spinning) return;
+    initAudio();
+    if (balance < bet) {
+        document.getElementById("result").innerText = "❌ МАЛО СРЕДСТВ";
+        beep(180, 0.25, "sawtooth", 0.08);
+        return;
+    }
+    spinning = true;
+    balance -= bet;
+    updateUI();
+
+    const reels = [
+        document.getElementById("reel1"),
+        document.getElementById("reel2"),
+        document.getElementById("reel3")
+    ];
+    const result = document.getElementById("result");
+    const lever = document.getElementById("lever");
+    const startBtn = document.getElementById("startBtn");
+    const payline = document.getElementById("payline");
+    const jackpot = document.getElementById("jackpot");
+
+    reels.forEach(r => r.classList.remove("win"));
+    result.classList.remove("win-text");
+    payline.classList.remove("active");
+    jackpot.classList.remove("show");
+    document.getElementById("winValue").textContent = "0";
+
+    lever.classList.add("pulled");
+    startBtn.disabled = true;
+    result.innerText = "ВРАЩЕНИЕ...";
+
+    const finalSymbols = [randomSymbol(), randomSymbol(), randomSymbol()];
+
+    reels.forEach(reel => reel.classList.add("spinning"));
+
+    const animation = setInterval(() => {
+        reels.forEach(reel => setSymbol(reel, randomSymbol()));
+        playClick();
+    }, 80);
+
+    setTimeout(() => {
+        setSymbol(reels[0], finalSymbols[0]);
+        reels[0].classList.remove("spinning");
+        playStop();
+    }, 1300);
+
+    setTimeout(() => {
+        setSymbol(reels[1], finalSymbols[1]);
+        reels[1].classList.remove("spinning");
+        playStop();
+    }, 2000);
+
+    setTimeout(() => {
+        setSymbol(reels[2], finalSymbols[2]);
+        reels[2].classList.remove("spinning");
+        playStop();
+        clearInterval(animation);
+
+        const s1 = finalSymbols[0];
+        const s2 = finalSymbols[1];
+        const s3 = finalSymbols[2];
+        let win = 0;
+        let isJackpot = false;
+
+        if (s1.name === s2.name && s2.name === s3.name) {
+            win = bet * s1.prize * 3;
+            isJackpot = true;
+        } else if (s1.name === s2.name || s2.name === s3.name || s1.name === s3.name) {
+            const match = (s1.name === s2.name) ? s1 : (s2.name === s3.name ? s2 : s1);
+            win = bet * match.prize;
+        }
+
+        if (win > 0) {
+            balance += win;
+            document.getElementById("winValue").textContent = win;
+            reels.forEach(r => r.classList.add("win"));
+            payline.classList.add("active");
+            result.classList.add("win-text");
+
+            if (isJackpot) {
+                result.innerText = `🏆 JACKPOT! ${s1.name} +${win}`;
+                jackpot.classList.add("show");
+                playJackpot();
+                setTimeout(() => jackpot.classList.remove("show"), 2500);
+            } else {
+                result.innerText = `🎯 ${s1.name} +${win}`;
+                playWin();
+            }
+        } else {
+            result.innerText = `😢 ${s3.name} — без выигрыша`;
+        }
+
+        updateUI();
+        spinning = false;
+        startBtn.disabled = false;
+
+        setTimeout(() => lever.classList.remove("pulled"), 500);
+    }, 2700);
+}
+
+/* Пробел */
+document.addEventListener("keydown", function(e) {
+    if (e.code === "Space") { e.preventDefault(); spin(); }
+});
+
+/* Инициализация */
+setSymbol(document.getElementById("reel1"), symbols[0]);
+setSymbol(document.getElementById("reel2"), symbols[1]);
+setSymbol(document.getElementById("reel3"), symbols[2]);
+updateUI();
+</script>
+</body>
+</html>
