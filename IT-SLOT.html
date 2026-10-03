@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06080d">
+<title>IT FAULT SLOT</title>
+<style>
+:root{--line:#263548;--text:#eef6ff;--muted:#8392a8;--cyan:#00e5ff;--green:#39ff88;--red:#ff3158;--amber:#ffc247}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#17334b 0,#09111b 34%,#05070b 72%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{overflow-x:hidden}
+.app{width:min(1180px,100%);margin:auto;padding:14px 16px 40px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:44px;height:44px;border:1px solid #35516a;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#142331,#070a0f);box-shadow:0 0 24px #00e5ff1c}
+.logo b{color:var(--cyan);font-size:18px}
+.title{font-weight:900;letter-spacing:.09em;font-size:clamp(18px,4vw,30px)}
+.sub{font-size:11px;color:var(--muted);margin-top:2px}
+.top-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.credits{padding:9px 13px;border:1px solid #33465d;border-radius:12px;background:#09101a;font-weight:800;color:var(--amber);white-space:nowrap}
+.loan-btn{padding:9px 13px;border:1px solid #ff315866;border-radius:12px;background:linear-gradient(180deg,#3a0b18,#1a0509);color:#ff8a9c;font-weight:900;cursor:pointer;letter-spacing:.04em;font-size:12px;white-space:nowrap}
+.loan-btn:hover{background:linear-gradient(180deg,#5a0f22,#2a060e);color:#ffb3c0}
+.loan-btn:disabled{opacity:.5;cursor:default}
+.hero{position:relative;overflow:hidden;border:1px solid #2b3d52;border-radius:22px;background:linear-gradient(180deg,#101925e8,#080c12e8);box-shadow:0 22px 60px #0008;padding:20px}
+.status{position:relative;display:flex;justify-content:space-between;gap:12px;align-items:center;color:var(--muted);font-size:12px;margin-bottom:12px}
+.live{color:var(--green);font-weight:900;letter-spacing:.08em}
+.live:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);margin-right:7px;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35;transform:scale(.65)}}
+.reels{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;background:#020407;padding:14px;border:2px solid #34475e;border-radius:17px;box-shadow:inset 0 0 35px #000}
+.reel{height:170px;display:grid;place-items:center;overflow:hidden;border:4px solid #59697a;border-radius:13px;background:linear-gradient(180deg,#f6f8fa,#aeb8c1);color:#101318;position:relative}
+.reel span{font-size:clamp(22px,4vw,38px);font-weight:1000;text-align:center;padding:10px;word-break:break-word}
+.reel.spin{animation:reelshake .07s linear infinite}
+@keyframes reelshake{50%{transform:translateY(5px)}}
+.result{position:relative;text-align:center;min-height:56px;margin:14px 0 2px;font-size:clamp(16px,3.6vw,26px);font-weight:1000;color:var(--amber);line-height:1.3}
+.result.win{color:var(--green)}
+.result .sub2{display:block;font-size:.55em;opacity:.85;margin-top:4px;font-weight:800;color:var(--muted)}
+.controls{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;margin-top:16px}
+.pickbox,.betbox{border:1px solid var(--line);border-radius:14px;background:#080d14;padding:12px;margin-bottom:10px}
+.pickhead,.bethead{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-bottom:8px}
+.pickhead b{color:var(--cyan)}
+.picks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pick{border:1px solid #26374a;border-radius:10px;padding:8px 6px;background:#0d141e;color:#cfe0f1;font-weight:800;font-size:11px;cursor:pointer;text-align:center;line-height:1.2}
+.pick small{display:block;color:var(--muted);font-weight:600;font-size:9px;margin-top:2px}
+.pick.active{border-color:var(--red);background:#1a0c12;color:#fff}
+.pick:disabled{opacity:.5;cursor:default}
+.bets{display:flex;gap:7px;flex-wrap:wrap}
+.bet{border:1px solid #34485f;background:#101925;color:#dce8f5;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer}
+.bet.active{border-color:var(--cyan);color:var(--cyan)}
+.bet:disabled{opacity:.55;cursor:default}
+.bigbutton{margin-top:10px;width:100%;border:0;border-radius:14px;padding:16px 20px;background:linear-gradient(180deg,#ff3d5d,#a90e2d);color:white;font-weight:1000;letter-spacing:.08em;font-size:17px;box-shadow:0 7px 0 #570616;cursor:pointer}
+.bigbutton:active{transform:translateY(5px);box-shadow:0 2px 0 #570616}
+.bigbutton:disabled{filter:grayscale(.6);opacity:.65}
+.action-area{display:flex;align-items:center;justify-content:center}
+.redlever{width:150px;height:150px;border-radius:50%;border:0;padding:0;cursor:pointer;background:radial-gradient(circle at 32% 26%,#ff8a9c 0%,#ff3355 28%,#c00d2c 62%,#7a0718 100%);color:#fff;font-weight:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.15;font-size:14px;box-shadow:0 12px 0 #4a0410,0 0 40px #ff315866,inset 0 -10px 24px #00000066;text-transform:uppercase}
+.redlever b{display:block;font-size:22px;margin-bottom:2px}
+.redlever small{font-size:10px;opacity:.85;font-weight:800}
+.redlever:active,.redlever.pulled{transform:translateY(9px);box-shadow:0 3px 0 #4a0410}
+.redlever:disabled{filter:grayscale(.5);cursor:default}
+.panel{margin-top:14px;border:1px solid var(--line);border-radius:18px;background:#080d14cc;padding:15px}
+.panel h2{font-size:14px;letter-spacing:.08em;margin:0 0 11px;color:#cfe0f1}
+.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.cat{border:1px solid #26374a;border-radius:12px;padding:10px;background:#0d141e;min-height:64px}
+.cat b{display:block;font-size:12px}
+.cat small{color:var(--muted);font-size:10px}
+.history{display:flex;flex-direction:column;gap:7px}
+.row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border:1px solid #1d2a39;border-radius:10px;padding:9px 11px;background:#0b1119;font-size:12px}
+.row span{color:var(--muted)}
+.tag{color:var(--amber);font-weight:900}
+.tag.win{color:var(--green)}
+.tag.lose{color:var(--red)}
+.footer{color:#647388;text-align:center;font-size:10px;margin-top:16px}
+.loan-panel{border-color:#ff315844;background:linear-gradient(180deg,#1a0a10cc,#0a0508cc)}
+.loan-panel h2{color:#ff8a9c}
+.loan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.loan-cell{border:1px solid #ff315833;border-radius:12px;padding:10px;background:#0d070acc}
+.loan-cell small{display:block;color:#b4808c;font-size:10px;letter-spacing:.06em;margin-bottom:4px;text-transform:uppercase}
+.loan-cell b{display:block;font-size:16px;color:#ffb3c0;font-weight:1000}
+.loan-cell b.green{color:var(--green)}
+.loan-cell b.amber{color:var(--amber)}
+.loan-cell b.red{color:var(--red)}
+.loan-actions{display:flex;gap:8px;flex-wrap:wrap}
+.loan-act{border:1px solid #ff315866;border-radius:10px;padding:10px 14px;background:#1a0a10;color:#ffb3c0;font-weight:900;cursor:pointer;font-size:12px}
+.loan-act:disabled{opacity:.5;cursor:default}
+.loan-act.ghost{border-color:#33465d;background:#0d141e;color:#a9b8c9}
+.loan-empty{color:#b4808c;font-size:12px;padding:6px 0}
+@media(max-width:720px){
+  .reel{height:125px;border-width:3px}
+  .controls{grid-template-columns:1fr}
+  .action-area{order:2}
+  .redlever{width:130px;height:130px;margin:0 auto}
+  .picks{grid-template-columns:repeat(3,1fr)}
+  .cats{grid-template-columns:repeat(2,1fr)}
+  .row{grid-template-columns:1fr auto}.row .time{display:none}
+  .loan-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo"><b>IT</b></div>
+      <div><div class="title">FAULT SLOT</div><div class="sub">КТО ВИНОВАТ В ПРОБЛЕМЕ?</div></div>
+    </div>
+    <div class="top-right">
+      <div class="credits">💰 <span id="bank">1000</span> CR</div>
+      <button class="loan-btn" id="loanBtn" type="button">💸 ВЗЯТЬ МИКРОЗАЙМ</button>
+    </div>
+  </header>
+
+  <main class="hero">
+    <div class="status"><span class="live">SYSTEM ONLINE</span><span>Ставка: <b id="betLabel">50</b> CR</span></div>
+
+    <div class="reels">
+      <div class="reel" id="r1"><span>СЕТЬ</span></div>
+      <div class="reel" id="r2"><span>ИБ</span></div>
+      <div class="reel" id="r3"><span>ИНФРА</span></div>
+    </div>
+
+    <div class="result" id="result">ВЫБЕРИ ВИНОВНИКА И ДЁРНИ КНОПКУ</div>
+
+    <div class="controls">
+      <div>
+        <div class="pickbox">
+          <div class="pickhead"><span>НА КОГО СТАВИМ</span><b id="pickLabel">не выбрано</b></div>
+          <div class="picks" id="picks"></div>
+        </div>
+
+        <div class="betbox">
+          <div class="bethead"><span>РАЗМЕР СТАВКИ</span><b>x2 / x5 / x10</b></div>
+          <div class="bets">
+            <button class="bet" data-bet="10">10</button>
+            <button class="bet" data-bet="25">25</button>
+            <button class="bet active" data-bet="50">50</button>
+            <button class="bet" data-bet="100">100</button>
+            <button class="bet" data-bet="250">250</button>
+            <button class="bet" data-bet="500">500</button>
+          </div>
+        </div>
+
+        <button class="bigbutton" id="spinBtn" type="button">⚡ ЗАПУСТИТЬ ПОИСК ВИНОВНИКА</button>
+      </div>
+
+      <div class="action-area">
+        <button class="redlever" id="redLever" type="button">
+          <b>GO</b>
+          <span>ДЁРНУТЬ</span>
+          <small>ПОИСК ВИНОВНИКА</small>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <section class="panel">
+    <h2>ВОЗМОЖНЫЕ ВИНОВНИКИ</h2>
+    <div class="cats" id="cats"></div>
+  </section>
+
+  <section class="panel loan-panel">
+    <h2>🏦 МИКРОЗАЙМ «БЫСТРЫЕ КРЕДИТЫ ДЛЯ АЙТИШНИКОВ»</h2>
+    <div id="loanBody"></div>
+  </section>
+
+  <section class="panel">
+    <h2>ПОСЛЕДНИЕ РАУНДЫ</h2>
+    <div class="history" id="history"></div>
+  </section>
+
+  <div class="footer">Игра-шутка. Все кредиты виртуальные, микрозайм — тоже.</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- данные ----------
+  var departments = [
+    {name:"СЕТЕВЫЕ ИНЖЕНЕРЫ", short:"СЕТЬ",         desc:"маршрутизация / VLAN / DNS"},
+    {name:"ИНФРАСТРУКТУРА",   short:"СЕРВЕРЫ",        desc:"серверы / VM / storage"},
+    {name:"ИБ / АНТИВИРУС",   short:"ИБ",           desc:"EDR / AV / политики"},
+    {name:"ОБНОВЛЕНИЕ СИСТЕМ",short:"ОБНОВЛЕНИЕ",   desc:"патч / релиз / hotfix"},
+    {name:"1С",               short:"1С",           desc:"клиент / сервер / база"},
+    {name:"РАЗРАБОТЧИКИ",     short:"РАЗРАБОТКА",   desc:"код / API / интеграции"},
+    {name:"БАЗЫ ДАННЫХ",      short:"БАЗА",         desc:"SQL / блокировки / backup"},
+    {name:"ТЕЛЕФОНИЯ",        short:"ТЕЛЕФОНИЯ",    desc:"SIP / АТС / шлюз"},
+    {name:"ВИРТУАЛИЗАЦИЯ",    short:"ВИРТУАЛИЗАЦИЯ",desc:"гипервизор / кластер"},
+    {name:"ПОЧТА",            short:"ПОЧТА",        desc:"SMTP / Exchange / фильтр"},
+    {name:"РАБОЧИЕ МЕСТА",    short:"РАБОЧЕЕ МЕСТО",desc:"ПК / ноутбук / профиль"},
+    {name:"ПОЛЬЗОВАТЕЛЬ",     short:"ПОЛЬЗОВАТЕЛЬ", desc:"ну... бывает"}
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function fmt(n){ try{ return Number(n).toLocaleString("ru-RU"); }catch(e){ return String(n); } }
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+  function randDept(){ return departments[Math.floor(Math.random()*departments.length)]; }
+  function setReel(el, d){ el.querySelector("span").textContent = d.short; }
+
+  var bet = 50;
+  var spinning = false;
+  var selectedDept = null;
+
+  // ---------- состояние ----------
+  var bank = 1000;
+  try {
+    var savedBank = Number(localStorage.getItem("faultBank"));
+    if (!isNaN(savedBank) && savedBank > 0) bank = savedBank;
+  } catch(e){}
+  $("bank").textContent = bank;
+
+  var loan = null;
+  try {
+    var raw = localStorage.getItem("faultLoan");
+    loan = raw ? JSON.parse(raw) : null;
+  } catch(e){ loan = null; }
+
+  function persistBank(){ try{ localStorage.setItem("faultBank", bank); }catch(e){} }
+  function persistLoan(){
+    try{
+      if (loan) localStorage.setItem("faultLoan", JSON.stringify(loan));
+      else localStorage.removeItem("faultLoan");
+    }catch(e){}
+  }
+
+  // ---------- отделы ----------
+  $("cats").innerHTML = departments.map(function(d){
+    return '<div class="cat"><b>' + d.short + ' — ' + d.name + '</b><small>' + d.desc + '</small></div>';
+  }).join("");
+
+  // ---------- плитки выбора ----------
+  (function renderPicks(){
+    var box = $("picks");
+    box.innerHTML = "";
+    departments.forEach(function(d, i){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "pick";
+      b.innerHTML = d.short + '<small>' + d.desc.split(" / ")[0] + '</small>';
+      b.addEventListener("click", function(){
+        if (spinning) return;
+        var all = box.querySelectorAll(".pick");
+        for (var k=0;k<all.length;k++) all[k].classList.remove("active");
+        b.classList.add("active");
+        selectedDept = d;
+        $("pickLabel").textContent = d.short;
+      });
+      box.appendChild(b);
+    });
+  })();
+
+  // ---------- ставки ----------
+  (function(){
+    var bets = document.querySelectorAll(".bet");
+    for (var i=0;i<bets.length;i++){
+      bets[i].addEventListener("click", function(){
+        if (spinning) return;
+        var all = document.querySelectorAll(".bet");
+        for (var k=0;k<all.length;k++) all[k].classList.remove("active");
+        this.classList.add("active");
+        bet = Number(this.getAttribute("data-bet"));
+        $("betLabel").textContent = bet;
+      });
+    }
+  })();
+
+  // ---------- история ----------
+  function saveHistory(entry){
+    try{
+      var old = JSON.parse(localStorage.getItem("faultHistory") || "[]");
+      if (!Array.isArray(old)) old = [];
+      old.unshift(entry);
+      localStorage.setItem("faultHistory", JSON.stringify(old.slice(0,12)));
+    }catch(e){}
+    renderHistory();
+  }
+  function renderHistory(){
+    var h = [];
+    try { h = JSON.parse(localStorage.getItem("faultHistory") || "[]"); } catch(e){ h = []; }
+    if (!Array.isArray(h) || !h.length){
+      $("history").innerHTML = '<div style="color:#65758a;font-size:12px">История пуста. Первый инцидент ждёт.</div>';
+      return;
+    }
+    var html = "";
+    for (var i=0;i<h.length;i++){
+      var x = h[i] || {};
+      var reels = Array.isArray(x.reels) ? x.reels : (x.dept ? [x.dept] : ["—"]);
+      var pick  = x.pick || x.dept || "—";
+      var won   = !!x.won;
+      var betV  = Number(x.bet) || 0;
+      var amtV  = Number(x.amount) || 0;
+      var time  = x.time || "";
+      html += '<div class="row">'
+            +   '<b>' + reels.join(" • ") + '</b>'
+            +   '<span class="tag ' + (won ? "win" : "lose") + '">'
+            +     (won ? "+" + amtV : "−" + betV) + ' CR</span>'
+            +   '<span class="time">ставка: ' + pick + (time ? " • " + time : "") + '</span>'
+            + '</div>';
+    }
+    $("history").innerHTML = html;
+  }
+  renderHistory();
+
+  // ---------- микрозайм ----------
+  var LOAN_AMOUNTS = [500, 1000, 2000, 5000];
+
+  function renderLoan(){
+    var box = $("loanBody");
+    if (!loan){
+      box.innerHTML =
+        '<div class="loan-empty">Займов нет. Ты подозрительно финансово стабилен 😎</div>' +
+        '<div class="loan-actions" style="margin-top:10px">' +
+          '<button class="loan-act" id="takeLoanInline" type="button">💸 ОФОРМИТЬ ЗАЙМ</button>' +
+        '</div>';
+      var btn = $("takeLoanInline");
+      if (btn) btn.addEventListener("click", takeLoan);
+      return;
+    }
+
+    var years = loan.years;
+    var yearsLabel = years > 1000 ? "∞ (пожизненно)" : (years + " лет");
+    var rate = loan.rate;
+    var mood = "🙂", moodColor = "green", moodText = "Терпимо";
+    if (rate >= 60){ mood = "😐"; moodColor = "amber"; moodText = "Грустно"; }
+    if (rate >= 75){ mood = "😰"; moodColor = "red";   moodText = "Очень больно"; }
+    if (rate >= 85){ mood = "💀"; moodColor = "red";   moodText = "Ты наш навсегда"; }
+
+    box.innerHTML =
+      '<div class="loan-grid">' +
+        '<div class="loan-cell"><small>Долг</small><b class="red">' + fmt(loan.amount) + ' CR</b></div>' +
+        '<div class="loan-cell"><small>Ставка</small><b class="amber">' + rate + '%</b></div>' +
+        '<div class="loan-cell"><small>Выплачивать</small><b>' + yearsLabel + '</b></div>' +
+        '<div class="loan-cell"><small>Настроение</small><b class="' + moodColor + '">' + mood + ' ' + moodText + '</b></div>' +
+      '</div>' +
+      '<div class="loan-actions">' +
+        '<button class="loan-act" id="repayBtn" type="button"' + (bank < 500 ? ' disabled' : '') + '>💳 ПОГАСИТЬ 500 CR</button>' +
+        '<button class="loan-act ghost" id="resetBtn" type="button">🧹 СБРОСИТЬ ВСЁ</button>' +
+      '</div>';
+
+    var repay = $("repayBtn");
+    if (repay) repay.addEventListener("click", function(){
+      if (bank < 500) return;
+      bank -= 500;
+      $("bank").textContent = bank;
+      persistBank();
+
+      var ratio = loan.amount > 0 ? (loan.amount - 500) / loan.amount : 0;
+      loan.amount = Math.max(0, loan.amount - 500);
+      loan.years  = Math.max(1, Math.round(loan.years * ratio));
+
+      if (loan.amount <= 0){
+        loan = null;
+        persistLoan();
+        $("result").textContent = "🏦 ЗАЙМ ПОГАШЕН. ТЫ СВОБОДЕН!";
+      } else {
+        persistLoan();
+      }
+      renderLoan();
+    });
+
+    var reset = $("resetBtn");
+    if (reset) reset.addEventListener("click", function(){
+      loan = null; persistLoan();
+      bank = 1000; $("bank").textContent = bank; persistBank();
+      renderLoan();
+      $("result").textContent = "🧹 ВСЁ ОБНУЛЕНО. НАЧИНАЕМ С ЧИСТОГО ЛИСТА.";
+    });
+  }
+
+  function takeLoan(){
+    if (spinning) return;
+    var amount = LOAN_AMOUNTS[Math.floor(Math.random()*LOAN_AMOUNTS.length)];
+    var rate = 40 + Math.floor(Math.random()*51); // 40..90
+    var years = Math.round((amount/100) * (rate/40) * 3);
+    if (years < 1) years = 1;
+    if (years > 9999) years = 9999;
+
+    if (loan){
+      loan.amount += amount;
+      loan.rate = Math.max(loan.rate, rate);
+      loan.years = loan.years + years;
+    } else {
+      loan = { amount: amount, rate: rate, years: years };
+    }
+
+    bank += amount;
+    $("bank").textContent = bank;
+    persistBank(); persistLoan(); renderLoan();
+
+    $("result").innerHTML =
+      '💸 ЗАЙМ ОФОРМЛЕН: +' + fmt(amount) + ' CR' +
+      '<span class="sub2">Ставка ' + rate + '% • выплачивать примерно ' + years + ' лет</span>';
+    burst();
+  }
+
+  $("loanBtn").addEventListener("click", takeLoan);
+  renderLoan();
+
+  // ---------- эффекты ----------
+  function burst(){
+    var p = document.createElement("div");
+    p.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:9;overflow:hidden";
+    document.body.appendChild(p);
+    for (var i=0;i<40;i++){
+      var e = document.createElement("i");
+      var size = 5 + Math.random()*6;
+      e.style.cssText = "position:absolute;width:"+size+"px;height:"+size+"px;border-radius:50%;background:#00e5ff;left:"+(20+Math.random()*60)+"%;top:"+(-10+Math.random()*25)+"%;animation:fall 1.2s ease-out forwards";
+      e.style.setProperty("--x", (Math.random()*260-130)+"px");
+      e.style.animationDelay = (Math.random()*0.25)+"s";
+      p.appendChild(e);
+    }
+    setTimeout(function(){ p.remove(); }, 1600);
+  }
+
+  // стиль для частиц
+  var styleEl = document.createElement("style");
+  styleEl.textContent = "@keyframes fall{to{transform:translate(var(--x),100vh) rotate(600deg);opacity:0}}";
+  document.head.appendChild(styleEl);
+
+  // ---------- спин ----------
+  async function spin(){
+    if (spinning) return;
+    if (!selectedDept){
+      $("result").textContent = "СНАЧАЛА ВЫБЕРИ ВИНОВНИКА";
+      return;
+    }
+    if (bank < bet){
+      $("result").innerHTML = "НЕДОСТАТОЧНО КРЕДИТОВ<span class='sub2'>Возьми микрозайм 💸 — потом разберёшься</span>";
+      return;
+    }
+
+    spinning = true;
+    $("spinBtn").disabled = true;
+    $("redLever").classList.add("pulled");
+    $("redLever").disabled = true;
+    $("loanBtn").disabled = true;
+
+    var picks = document.querySelectorAll(".pick");
+    for (var i=0;i<picks.length;i++) picks[i].disabled = true;
+    var betBtns = document.querySelectorAll(".bet");
+    for (var j=0;j<betBtns.length;j++) betBtns[j].disabled = true;
+
+    bank -= bet;
+    $("bank").textContent = bank;
+    persistBank();
+
+    $("result").classList.remove("win");
+    $("result").textContent = "АНАЛИЗ ИНЦИДЕНТА...";
+
+    var reels = [$("r1"), $("r2"), $("r3")];
+    for (var k=0;k<reels.length;k++) reels[k].classList.add("spin");
+
+    var finalA = randDept(), finalB = randDept(), finalC = randDept();
+
+    var ticker = setInterval(function(){
+      for (var t=0;t<reels.length;t++) setReel(reels[t], randDept());
+    }, 75);
+
+    await sleep(1150);
+    setReel(reels[0], finalA); reels[0].classList.remove("spin");
+
+    await sleep(600);
+    setReel(reels[1], finalB); reels[1].classList.remove("spin");
+
+    await sleep(700);
+    setReel(reels[2], finalC); reels[2].classList.remove("spin");
+    clearInterval(ticker);
+
+    var names = [finalA.name, finalB.name, finalC.name];
+    var multiplier = 2;
+    if (names[0] === names[1] && names[1] === names[2]) multiplier = 10;
+    else if (names[0] === names[1] || names[1] === names[2] || names[0] === names[2]) multiplier = 5;
+
+    var won = names.indexOf(selectedDept.name) !== -1;
+    var payout = won ? bet * multiplier : 0;
+
+    if (won){
+      bank += payout;
+      $("bank").textContent = bank;
+      persistBank();
+    }
+
+    var reelsText = [finalA.short, finalB.short, finalC.short];
+
+    if (won){
+      $("result").innerHTML =
+        '🎯 УГАДАЛ! +' + payout + ' CR (x' + multiplier + ')' +
+        '<span class="sub2">Выпало: ' + reelsText.join(" • ") + ' • твоя ставка: ' + selectedDept.short + '</span>';
+    } else {
+      $("result").innerHTML =
+        '❌ МИМО. ВИНОВАТ: ' + finalA.short +
+        '<span class="sub2">Выпало: ' + reelsText.join(" • ") + ' • ставка сгорела</span>';
+    }
+    $("result").classList.toggle("win", won);
+
+    saveHistory({
+      reels: reelsText,
+      pick: selectedDept.short,
+      bet: bet,
+      won: won,
+      amount: payout,
+      time: new Date().toLocaleTimeString("ru-RU", {hour:"2-digit",minute:"2-digit",second:"2-digit"})
+    });
+
+    if (won) burst();
+
+    await sleep(750);
+
+    $("redLever").classList.remove("pulled");
+    $("redLever").disabled = false;
+    $("spinBtn").disabled = false;
+    $("loanBtn").disabled = false;
+    for (var m=0;m<picks.length;m++) picks[m].disabled = false;
+    for (var n=0;n<betBtns.length;n++) betBtns[n].disabled = false;
+    spinning = false;
+  }
+
+  $("spinBtn").addEventListener("click", function(e){ e.preventDefault(); spin(); });
+  $("redLever").addEventListener("click", function(e){ e.preventDefault(); spin(); });
+  document.addEventListener("keydown", function(e){
+    if (e.code === "Space" && !e.repeat){
+      var tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      e.preventDefault();
+      spin();
+    }
+  });
+
+  // сигнал что всё ок
+  console.log("[Fault Slot] OK, игра инициализирована");
+})();
+</script>
+</body>
+</html>
