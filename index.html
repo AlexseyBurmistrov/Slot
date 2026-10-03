@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06080d">
+<title>LUDO-DESK</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo"><b>IT</b></div>
+      <div>
+        <div class="title">LUDO-DESK</div>
+        <div class="sub">КАЗИНО ВСЕГДА ВЫИГРЫВАЕТ</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="chip credits">💰 <span id="bank">0</span> CR</div>
+      <div class="chip trust">🛡 <span id="trustVal">0</span></div>
+      <div class="chip crim">🚔 <span id="crimVal">0</span></div>
+      <div class="chip fatigue">😩 <span id="fatVal">0</span>%</div>
+      <div class="chip health" id="healthChip">❤️ <span id="hpVal">100</span></div>
+      <div class="chip tick" id="tickBox">⏱ <span id="tickSec">5</span></div>
+      <button class="snd-btn on" id="sndBtn" type="button">🔊</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="main-col">
+
+      <main class="hero">
+        <div class="status"><span class="live">СИСТЕМА ОНЛАЙН</span><span>Ставка: <b id="betLabel">0</b> CR • комиссия <span id="feeLabel">0</span> CR</span></div>
+
+        <div class="reels">
+          <div class="reel" id="r1"><span>СЕТЬ</span></div>
+          <div class="reel" id="r2"><span>ИБ</span></div>
+          <div class="reel" id="r3"><span>ИНФРА</span></div>
+        </div>
+
+        <div class="result" id="result">ВЫБЕРИ ВИНОВНИКА И ДЁРНИ РЫЧАГ</div>
+
+        <div class="controls">
+          <div>
+            <div class="pickbox">
+              <div class="pickhead"><span>НА КОГО СТАВИМ</span><b id="pickLabel">не выбрано</b></div>
+              <div class="picks" id="picks"></div>
+            </div>
+
+            <div class="betbox">
+              <div class="bethead"><span>РАЗМЕР СТАВКИ</span><b id="multiplierInfo">—</b></div>
+              <div class="bets" id="bets"></div>
+            </div>
+
+            <button class="bigbutton" id="spinBtn" type="button">⚡ ЗАПУСТИТЬ ПОИСК ВИНОВНИКА</button>
+          </div>
+
+          <div class="lever-area">
+            <div class="lever" id="lever" role="button" aria-label="Дёрнуть рычаг">
+              <div class="lever-stick"><div class="lever-knob">GO</div></div>
+              <div class="lever-base"></div>
+              <div class="lever-label">ДЁРНУТЬ</div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <section class="panel loan-panel">
+        <h2>🏦 МИКРОЗАЙМ «БЫСТРЫЕ КРЕДИТЫ ДЛЯ АЙТИШНИКОВ»</h2>
+
+        <div class="loan-summary">
+          <div class="loan-cell"><small>Общий долг</small><b class="red" id="loanTotal">0</b></div>
+          <div class="loan-cell"><small>Займов</small><b id="loanCount">0</b></div>
+          <div class="loan-cell"><small>Средняя ставка</small><b class="amber" id="loanAvg">—</b></div>
+          <div class="loan-cell"><small>Просрочек</small><b class="red" id="lateCount">0</b></div>
+          <div class="loan-cell"><small>Накапало</small><b class="red" id="accruedVal">0</b></div>
+          <div class="loan-cell"><small>Крим. рейтинг</small><b class="red" id="crimCell">0</b></div>
+        </div>
+
+        <div class="credit-calc">
+          <div class="row1">
+            <div class="cc-field">
+              <label>Сумма займа</label>
+              <select id="ccAmount"></select>
+            </div>
+            <div class="cc-field">
+              <label>Залог</label>
+              <select id="ccCollateral"></select>
+            </div>
+            <div class="cc-field">
+              <label>Поручитель</label>
+              <select id="ccGuarantor"><option value="">— без поручителя —</option></select>
+            </div>
+          </div>
+          <div class="cc-info">
+            <span>Ставка: <b id="ccRate">—</b></span>
+            <span>Платёж/5 сек: <b id="ccPay5">—</b></span>
+            <span>Переплата в час: <b id="ccOverHour">—</b></span>
+            <span>Срок: <b id="ccTerm">5 мин</b></span>
+          </div>
+        </div>
+
+        <div class="loan-actions">
+          <button class="loan-act self" id="selfLoanBtn" type="button">💸 ВЗЯТЬ НА СЕБЯ</button>
+          <button class="loan-act warn" id="restructBtn" type="button">🔄 РЕСТРУКТУРИЗАЦИЯ</button>
+          <button class="loan-act" id="repayBtn" type="button">💳 ПОГАСИТЬ 500 CR</button>
+          <button class="loan-act" id="repayAllBtn" type="button">💳💳 ПОГАСИТЬ ВСЁ</button>
+          <button class="loan-act ghost" id="autoPayBtn" type="button">🤖 АВТОПЛАТЁЖ: OFF</button>
+          <button class="loan-act ghost" id="resetBtn" type="button">🧹 СБРОС</button>
+        </div>
+
+        <div class="section-sub">АКТИВНЫЕ ЗАЙМЫ</div>
+        <div class="active-loans" id="activeLoans"></div>
+
+        <div id="selfCardWrap"></div>
+
+        <div class="section-sub">КОЛЛЕГИ — узнают о займе, копят обиды, отказывают</div>
+        <div class="colleagues" id="colleagues"></div>
+      </section>
+
+      <section class="panel cash-panel" id="cashPanel">
+        <h2>💸 СМЕШНЫЕ IT-СПОСОБЫ ВЕРНУТЬ ПЛАТЁЖ</h2>
+        <div class="cash-header">
+          <div class="fatigue-bar">
+            😩 Общая усталость: <span class="fb"><i id="fatBar" style="width:0%"></i></span>
+            <span id="fatText">0%</span>
+          </div>
+          <button class="rest-btn" id="restBtn" type="button">😴 ОТДОХНУТЬ</button>
+        </div>
+        <div id="restNote"></div>
+        <div id="cashBody"></div>
+      </section>
+
+      <div class="footer">Игра-шутка. Кредиты виртуальные, займы на себя и коллег — тем более 😄</div>
+
+      <button id="hardResetBtn" class="hard-reset" type="button" title="Полный сброс">обнулить всё</button>
+    </div>
+
+    <aside class="events-col" id="eventsCol">
+      <div class="ticket-box" id="ticketBox"></div>
+
+      <div class="events-head">
+        <span class="events-title">📡 ЛОГ СОБЫТИЙ</span>
+        <span class="events-counter" id="eventsCounter">0</span>
+      </div>
+      <div class="events" id="events"></div>
+    </aside>
+  </div>
+</div>
+
+<!-- ВАЖЕН ПОРЯДОК: loans.js и colleagues.js ДО events.js -->
+<script src="js/config.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/state.js"></script>
+<script src="js/departments.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/loans.js"></script>
+<script src="js/colleagues.js"></script>
+<script src="js/events.js"></script>
+<script src="js/cash.js"></script>
+<script src="js/slot.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
